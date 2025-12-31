@@ -762,54 +762,53 @@
     function loadScenario() {
         createVehicle();
 
-        const acuIT = addDevice('hpc', new THREE.Vector3(0, 4, 0), 'ACU_IT');
+        // HPC at rear of vehicle
+        const acuIT = addDevice('hpc', new THREE.Vector3(0, 4, -12), 'ACU_IT');
+
+        // Zone Controllers
         const frontL = addDevice('lan9692', new THREE.Vector3(-3.5, 4, 10), 'Front-L-9692');
         const frontR = addDevice('lan9692', new THREE.Vector3(3.5, 4, 10), 'Front-R-9692');
-        const rear = addDevice('lan9692', new THREE.Vector3(0, 4, -10), 'Rear-9692');
+        const rear = addDevice('lan9692', new THREE.Vector3(0, 4, -6), 'Rear-9692');
 
+        // LiDAR sensors
         const lidarFL = addDevice('lidar', new THREE.Vector3(-8.5, 10, 16.2), 'LiDAR-FL');
         const lidarFR = addDevice('lidar', new THREE.Vector3(8.5, 10, 16.2), 'LiDAR-FR');
         const lidarFC = addDevice('lidar', new THREE.Vector3(0, 5.5, 18.5), 'LiDAR-FC');
         const lidarRC = addDevice('lidar', new THREE.Vector3(0, 5.5, -18.5), 'LiDAR-RC');
 
-        const camFC = addDevice('camera', new THREE.Vector3(0, 10.5, 18.5), 'Cam-FC');
-        const camFL = addDevice('camera', new THREE.Vector3(0.6, 10.5, 18.5), 'Cam-FL');
-        const camFR = addDevice('camera', new THREE.Vector3(-0.6, 10.5, 18.5), 'Cam-FR');
-        const camSL1 = addDevice('camera', new THREE.Vector3(-8.5, 11, 16.5), 'Cam-SL1');
-        const camSR1 = addDevice('camera', new THREE.Vector3(8.5, 11, 16.5), 'Cam-SR1');
-        const camSL2 = addDevice('camera', new THREE.Vector3(-8.5, 11, 15.9), 'Cam-SL2');
-        const camSR2 = addDevice('camera', new THREE.Vector3(8.5, 11, 15.9), 'Cam-SR2');
-        const camRC = addDevice('camera', new THREE.Vector3(0, 9, -18.5), 'Cam-RC');
+        // Cameras (visual only, no connections)
+        addDevice('camera', new THREE.Vector3(0, 10.5, 18.5), 'Cam-FC');
+        addDevice('camera', new THREE.Vector3(0.6, 10.5, 18.5), 'Cam-FL');
+        addDevice('camera', new THREE.Vector3(-0.6, 10.5, 18.5), 'Cam-FR');
+        addDevice('camera', new THREE.Vector3(-8.5, 11, 16.5), 'Cam-SL1');
+        addDevice('camera', new THREE.Vector3(8.5, 11, 16.5), 'Cam-SR1');
+        addDevice('camera', new THREE.Vector3(-8.5, 11, 15.9), 'Cam-SL2');
+        addDevice('camera', new THREE.Vector3(8.5, 11, 15.9), 'Cam-SR2');
+        addDevice('camera', new THREE.Vector3(0, 9, -18.5), 'Cam-RC');
 
+        // Radar sensors
         const radarFC = addDevice('radar', new THREE.Vector3(0, 7, 18.5), 'Radar-FC');
         const radarFL = addDevice('radar', new THREE.Vector3(-7, 6.5, 17.5), 'Radar-FL');
         const radarFR = addDevice('radar', new THREE.Vector3(7, 6.5, 17.5), 'Radar-FR');
         const radarRL = addDevice('radar', new THREE.Vector3(-7, 6.5, -18), 'Radar-RL');
         const radarRR = addDevice('radar', new THREE.Vector3(7, 6.5, -18), 'Radar-RR');
 
+        // Zone Controller Backbone (10G)
         createConnection(frontL, acuIT);
         createConnection(frontR, acuIT);
         createConnection(rear, acuIT);
         createConnection(frontL, frontR);
 
+        // LiDAR connections
         createConnection(frontL, lidarFL);
         createConnection(frontL, lidarFC);
-        createConnection(frontL, camFL);
-        createConnection(frontL, camSL1);
-        createConnection(frontL, radarFL);
-
         createConnection(frontR, lidarFR);
-        createConnection(frontR, camFC);
-        createConnection(frontR, camFR);
-        createConnection(frontR, camSR1);
+        createConnection(rear, lidarRC);
+
+        // Radar connections
+        createConnection(frontL, radarFL);
         createConnection(frontR, radarFC);
         createConnection(frontR, radarFR);
-
-        createConnection(frontL, camSL2);
-        createConnection(frontR, camSR2);
-
-        createConnection(rear, lidarRC);
-        createConnection(rear, camRC);
         createConnection(rear, radarRL);
         createConnection(rear, radarRR);
 
