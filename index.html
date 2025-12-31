@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ROii3 - Autonomous Vehicle Simulator</title>
+    <script src="libs/three.min.js"></script>
+    <script src="libs/OrbitControls.js"></script>
+    <script src="libs/GLTFLoader.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0f;
+            overflow: hidden;
+            color: white;
+        }
+        #canvas3d { width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; }
+        .hud { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 10; }
+
+        /* Top Bar */
+        .top-bar {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+        .title-box {
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .title-box h1 { font-size: 18px; color: #10B981; font-weight: 700; }
+        .title-box p { font-size: 11px; color: #64748b; }
+
+        /* Classic Speedometer */
+        .speedometer {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 280px;
+            height: 280px;
+        }
+        .speedo-bg {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(20,20,30,0.95) 0%, rgba(10,10,15,0.98) 100%);
+            border-radius: 50%;
+            border: 4px solid #333;
+            box-shadow:
+                0 0 40px rgba(0,0,0,0.8),
+                inset 0 0 60px rgba(0,0,0,0.5),
+                0 0 2px #444;
+            position: relative;
+            overflow: hidden;
+        }
+        .speedo-ring {
+            position: absolute;
+            top: 8px; left: 8px; right: 8px; bottom: 8px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        /* Speed Ticks */
+        .tick-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+        .tick {
+            position: absolute;
+            width: 3px;
+            height: 15px;
+            background: #888;
+            left: 50%;
+            top: 20px;
+            margin-left: -1.5px;
+            transform-origin: center 120px;
+            border-radius: 2px;
+        }
+        .tick.major {
+            width: 4px;
+            height: 22px;
+            background: #fff;
+            top: 15px;
+            margin-left: -2px;
+            transform-origin: center 125px;
+        }
+        .tick.red { background: #ef4444; }
+
+        /* Speed Labels */
+        .speed-label {
+            position: absolute;
+            font-size: 14px;
+            font-weight: 700;
+            color: #aaa;
+            text-align: center;
+            width: 40px;
+            margin-left: -20px;
+            left: 50%;
+            transform-origin: center 95px;
+        }
+        .speed-label.high { color: #ef4444; }
+
+        /* Needle */
+        .needle-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            transition: transform 0.1s ease-out;
+        }
+        .needle {
+            position: absolute;
+            width: 4px;
+            height: 100px;
+            left: 50%;
+            top: 40px;
+            margin-left: -2px;
+            transform-origin: center bottom;
+            background: linear-gradient(to top, #ef4444 0%, #ff6b6b 50%, #fff 100%);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(239,68,68,0.5);
+        }
+        .needle-cap {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 50%;
+            top: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            background: radial-gradient(circle at 30% 30%, #666, #222);
+            border-radius: 50%;
+            border: 2px solid #444;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+
+        /* Digital Speed */
+        .digital-speed {
+            position: absolute;
+            bottom: 55px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+        .digital-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #10B981;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 10px rgba(16,185,129,0.5);
+        }
+        .digital-unit {
+            font-size: 12px;
+            color: #64748b;
+            letter-spacing: 2px;
+        }
+
+        /* Gear Indicator */
+        .gear-indicator {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            font-weight: 700;
+            color: #f59e0b;
+            text-shadow: 0 0 10px rgba(245,158,11,0.5);
+        }
+
+        /* Acceleration Graph */
+        .accel-graph {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            width: 200px;
+            height: 100px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 10px;
+        }
+        .accel-title {
+            font-size: 10px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .accel-canvas {
+            width: 100%;
+            height: 70px;
+        }
+
+        /* Controls Help */
+        .controls-help {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            padding: 12px 24px;
+            border-radius: 20px;
+            display: flex;
+            gap: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .key {
+            display: inline-block;
+            background: linear-gradient(180deg, #444 0%, #222 100%);
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            font-weight: 600;
+            font-family: monospace;
+            font-size: 12px;
+            min-width: 24px;
+            text-align: center;
+            margin-right: 4px;
+            box-shadow: 0 2px 0 #111;
+        }
+        .control-item { font-size: 12px; color: #94a3b8; }
+
+        /* Button Group */
+        .btn-group {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 8px;
+            pointer-events: auto;
+        }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+        .btn-view {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            color: #60a5fa;
+        }
+        .btn-view:hover { background: rgba(59, 130, 246, 0.3); }
+        .btn-reset {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #f87171;
+        }
+        .btn-reset:hover { background: rgba(239, 68, 68, 0.3); }
+
+        /* Network Status */
+        .network-status {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(16,185,129,0.3);
+            min-width: 180px;
+        }
+        .status-title {
+            font-size: 10px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+        .status-row:last-child { margin-bottom: 0; }
+        .status-label { color: #94a3b8; }
+        .status-value { color: #10B981; font-weight: 600; }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10B981;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%) translateY(50px);
+            padding: 12px 24px;
+            background: rgba(16, 185, 129, 0.95);
+            color: white;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 14px;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* Loading */
+        .loading {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #0a0a0f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 1000;
+            transition: opacity 0.5s;
+        }
+        .loading.hidden { opacity: 0; pointer-events: none; }
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #222;
+            border-top: 4px solid #10B981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { margin-top: 20px; color: #64748b; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Vehicle Model...</div>
+    </div>
+
+    <div id="canvas3d"></div>
+
+    <div class="hud">
+        <div class="top-bar">
+            <div class="title-box">
+                <h1><i class="fas fa-car"></i> ROii3 - Autonomous Vehicle Simulator</h1>
+                <p>ACU_IT HPC | 3x LAN9692 Zone Controllers | 17 Sensors</p>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-view" id="viewBtn"><i class="fas fa-camera"></i> View</button>
+            <button class="btn btn-reset" id="resetBtn"><i class="fas fa-redo"></i> Reset</button>
+        </div>
+
+        <div class="network-status">
+            <div class="status-title"><i class="fas fa-network-wired"></i> Network Status</div>
+            <div class="status-row">
+                <span class="status-label">Devices</span>
+                <span class="status-value" id="deviceCount">0</span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">Links</span>
+                <span class="status-value" id="linkCount">0</span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">Bandwidth</span>
+                <span class="status-value" id="bandwidth">0 Gbps</span>
+            </div>
+            <div class="status-row">
+                <span class="status-label">Status</span>
+                <div class="status-dot"></div>
+            </div>
+        </div>
+
+        <!-- Classic Speedometer -->
+        <div class="speedometer">
+            <div class="speedo-bg">
+                <div class="speedo-ring"></div>
+                <div class="tick-container" id="tickContainer"></div>
+                <div class="needle-container" id="needleContainer">
+                    <div class="needle"></div>
+                </div>
+                <div class="needle-cap"></div>
+                <div class="gear-indicator" id="gearIndicator">D</div>
+                <div class="digital-speed">
+                    <div class="digital-value" id="digitalSpeed">0</div>
+                    <div class="digital-unit">KM/H</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acceleration Graph -->
+        <div class="accel-graph">
+            <div class="accel-title"><i class="fas fa-chart-line"></i> Acceleration</div>
+            <canvas id="accelCanvas" class="accel-canvas"></canvas>
+        </div>
+
+        <div class="controls-help">
+            <span class="control-item"><span class="key">W</span> Forward</span>
+            <span class="control-item"><span class="key">S</span> Reverse</span>
+            <span class="control-item"><span class="key">A</span><span class="key">D</span> Steer</span>
+            <span class="control-item"><span class="key">Space</span> Brake</span>
+            <span class="control-item"><span class="key">V</span> Camera</span>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+    // ROii3 - Optimized Autonomous Vehicle Simulator
+
+    // === Performance Optimizations ===
+    const FRAME_INTERVAL = 1000 / 60; // 60 FPS target
+    let lastFrameTime = 0;
+
+    // Shared geometries for performance
+    const sharedGeometries = {
+        sphere: new THREE.SphereGeometry(0.15, 6, 6),
+        cylinder: new THREE.CylinderGeometry(0.5, 0.5, 1, 8),
+        box: new THREE.BoxGeometry(1, 1, 1)
+    };
+
+    // === THREE.JS SETUP ===
+    const scene = new THREE.Scene();
+
+    // Optimized background
+    scene.background = new THREE.Color(0x050510);
+    scene.fog = new THREE.FogExp2(0x050510, 0.002);
+
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 800);
+
+    const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        powerPreference: 'high-performance'
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.getElementById('canvas3d').appendChild(renderer.domElement);
+
+    // === LIGHTING - Optimized ===
+    scene.add(new THREE.AmbientLight(0xffffff, 1.0));
+
+    const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    mainLight.position.set(50, 80, 50);
+    mainLight.castShadow = true;
+    mainLight.shadow.mapSize.width = 2048;
+    mainLight.shadow.mapSize.height = 2048;
+    mainLight.shadow.camera.near = 10;
+    mainLight.shadow.camera.far = 200;
+    mainLight.shadow.camera.left = -80;
+    mainLight.shadow.camera.right = 80;
+    mainLight.shadow.camera.top = 80;
+    mainLight.shadow.camera.bottom = -80;
+    scene.add(mainLight);
+
+    scene.add(new THREE.DirectionalLight(0x8080ff, 0.4).position.set(-30, 30, -30));
+
+    // === ENVIRONMENT ===
+    // Optimized grid
+    const gridHelper = new THREE.GridHelper(1000, 50, 0x10B981, 0x111);
+    gridHelper.material.opacity = 0.15;
+    gridHelper.material.transparent = true;
+    gridHelper.position.y = -1;
+    scene.add(gridHelper);
+
+    // Road
+    const roadGeo = new THREE.PlaneGeometry(30, 2000);
+    const roadMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
+    const road = new THREE.Mesh(roadGeo, roadMat);
+    road.rotation.x = -Math.PI / 2;
+    road.position.y = -0.5;
+    road.receiveShadow = true;
+    scene.add(road);
+
+    // Road lines
+    const lineMat = new THREE.MeshBasicMaterial({ color: 0xffd700 });
+    const centerLine = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 2000), lineMat);
+    centerLine.rotation.x = -Math.PI / 2;
+    centerLine.position.y = -0.45;
+    scene.add(centerLine);
+
+    // === STATE ===
+    const state = {
+        vehicleGroup: new THREE.Group(),
+        devices: new Map(),
+        connections: [],
+        cameraMode: 0
+    };
+    scene.add(state.vehicleGroup);
+
+    const drive = {
+        speed: 0,
+        prevSpeed: 0,
+        maxSpeed: 2.5,
+        acceleration: 0.05,
+        steering: 0,
+        maxSteering: 0.04,
+        keys: { w: false, a: false, s: false, d: false, space: false }
+    };
+
+    // Acceleration history for graph
+    const accelHistory = new Array(50).fill(0);
+    let accelCanvas, accelCtx;
+
+    // === SPEEDOMETER SETUP ===
+    function setupSpeedometer() {
+        const container = document.getElementById('tickContainer');
+        const minAngle = -135;
+        const maxAngle = 135;
+        const maxSpeed = 200;
+
+        // Create ticks
+        for (let speed = 0; speed <= maxSpeed; speed += 10) {
+            const angle = minAngle + (speed / maxSpeed) * (maxAngle - minAngle);
+            const isMajor = speed % 20 === 0;
+
+            const tick = document.createElement('div');
+            tick.className = 'tick' + (isMajor ? ' major' : '') + (speed >= 160 ? ' red' : '');
+            tick.style.transform = `rotate(${angle}deg)`;
+            container.appendChild(tick);
+
+            if (isMajor) {
+                const label = document.createElement('div');
+                label.className = 'speed-label' + (speed >= 160 ? ' high' : '');
+                label.textContent = speed;
+                const labelAngle = angle;
+                const radius = 95;
+                const rad = (labelAngle - 90) * Math.PI / 180;
+                const x = 140 + radius * Math.cos(rad);
+                const y = 140 + radius * Math.sin(rad);
+                label.style.left = x + 'px';
+                label.style.top = y + 'px';
+                label.style.marginLeft = '-20px';
+                label.style.marginTop = '-10px';
+                label.style.transform = 'none';
+                container.appendChild(label);
+            }
+        }
+
+        // Setup acceleration canvas
+        accelCanvas = document.getElementById('accelCanvas');
+        accelCanvas.width = 180;
+        accelCanvas.height = 70;
+        accelCtx = accelCanvas.getContext('2d');
+    }
+
+    function updateSpeedometer(speed) {
+        const displaySpeed = Math.abs(speed * 50);
+        const clampedSpeed = Math.min(displaySpeed, 200);
+
+        // Update needle
+        const minAngle = -135;
+        const maxAngle = 135;
+        const angle = minAngle + (clampedSpeed / 200) * (maxAngle - minAngle);
+        document.getElementById('needleContainer').style.transform = `rotate(${angle}deg)`;
+
+        // Update digital display
+        document.getElementById('digitalSpeed').textContent = displaySpeed.toFixed(0);
+
+        // Update gear indicator
+        const gear = speed < 0 ? 'R' : speed === 0 ? 'N' : 'D';
+        document.getElementById('gearIndicator').textContent = gear;
+    }
+
+    function updateAccelGraph() {
+        const accel = drive.speed - drive.prevSpeed;
+        accelHistory.shift();
+        accelHistory.push(accel * 100);
+        drive.prevSpeed = drive.speed;
+
+        if (!accelCtx) return;
+
+        accelCtx.fillStyle = 'rgba(0,0,0,0.3)';
+        accelCtx.fillRect(0, 0, 180, 70);
+
+        // Grid lines
+        accelCtx.strokeStyle = 'rgba(255,255,255,0.1)';
+        accelCtx.beginPath();
+        accelCtx.moveTo(0, 35);
+        accelCtx.lineTo(180, 35);
+        accelCtx.stroke();
+
+        // Acceleration line
+        accelCtx.strokeStyle = '#10B981';
+        accelCtx.lineWidth = 2;
+        accelCtx.beginPath();
+
+        for (let i = 0; i < accelHistory.length; i++) {
+            const x = (i / accelHistory.length) * 180;
+            const y = 35 - accelHistory[i] * 20;
+            if (i === 0) accelCtx.moveTo(x, y);
+            else accelCtx.lineTo(x, y);
+        }
+        accelCtx.stroke();
+
+        // Fill under curve
+        accelCtx.lineTo(180, 35);
+        accelCtx.lineTo(0, 35);
+        accelCtx.fillStyle = 'rgba(16, 185, 129, 0.2)';
+        accelCtx.fill();
+    }
+
+    // === DEVICE TEMPLATES ===
+    const templates = {
+        lan9692: { color: 0x10B981, size: [4, 2, 4] },
+        hpc: { color: 0xE11D48, size: [5, 2.5, 5] },
+        camera: { color: 0xd66b00, size: [0.8, 0.8, 0.8] },
+        lidar: { color: 0x10B981, size: [1.2, 1.2, 1.2] },
+        radar: { color: 0x952aff, size: [1.2, 1.2, 1.2] }
+    };
+
+    // === VEHICLE ===
+    function createVehicle() {
+        const loader = new THREE.GLTFLoader();
+        loader.load('./roii.glb',
+            (gltf) => {
+                const model = gltf.scene;
+                const box = new THREE.Box3().setFromObject(model);
+                const size = box.getSize(new THREE.Vector3());
+                const center = box.getCenter(new THREE.Vector3());
+
+                const scale = 40 / Math.max(size.x, size.y, size.z);
+                model.scale.set(scale, scale, scale);
+                model.position.set(-center.x, -center.y + size.y * scale * 0.5 + 0.5, -center.z);
+
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.material.transparent = true;
+                        child.material.opacity = 0.85;
+                        child.castShadow = true;
+                        if (child.material.color) {
+                            child.material.color.multiplyScalar(1.3);
+                        }
+                        child.material.emissive = new THREE.Color(0x222222);
+                        child.material.emissiveIntensity = 0.2;
+                    }
+                });
+
+                state.vehicleGroup.add(model);
+                document.getElementById('loading').classList.add('hidden');
+                showToast('Vehicle loaded! Use WASD to drive');
+            },
+            (progress) => {
+                const pct = (progress.loaded / progress.total * 100).toFixed(0);
+                document.querySelector('.loading-text').textContent = `Loading... ${pct}%`;
+            },
+            () => {
+                createProceduralVehicle();
+                document.getElementById('loading').classList.add('hidden');
+            }
+        );
+    }
+
+    function createProceduralVehicle() {
+        const mat = new THREE.MeshPhysicalMaterial({
+            color: 0xf0f4f8, transparent: true, opacity: 0.75,
+            metalness: 0.1, roughness: 0.2, clearcoat: 0.5
+        });
+
+        const chassis = new THREE.Mesh(new THREE.BoxGeometry(16, 10, 36), mat);
+        chassis.position.y = 6;
+        chassis.castShadow = true;
+        state.vehicleGroup.add(chassis);
+
+        const roof = new THREE.Mesh(new THREE.BoxGeometry(14, 4, 30), mat.clone());
+        roof.position.y = 13;
+        roof.castShadow = true;
+        state.vehicleGroup.add(roof);
+
+        const wheelGeo = new THREE.CylinderGeometry(2.5, 2.5, 1.5, 16);
+        const wheelMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a });
+        wheelGeo.rotateZ(Math.PI / 2);
+
+        [[-8, 2.5, 12], [8, 2.5, 12], [-8, 2.5, -12], [8, 2.5, -12]].forEach(pos => {
+            const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+            wheel.position.set(...pos);
+            wheel.castShadow = true;
+            state.vehicleGroup.add(wheel);
+        });
+
+        const front = new THREE.Mesh(new THREE.BoxGeometry(14, 2, 0.5), new THREE.MeshBasicMaterial({ color: 0x10B981 }));
+        front.position.set(0, 6, 18.1);
+        state.vehicleGroup.add(front);
+
+        const rear = new THREE.Mesh(new THREE.BoxGeometry(14, 2, 0.5), new THREE.MeshBasicMaterial({ color: 0xEF4444 }));
+        rear.position.set(0, 6, -18.1);
+        state.vehicleGroup.add(rear);
+    }
+
+    // === DEVICES & CONNECTIONS ===
+    let deviceCounter = 1;
+
+    function addDevice(type, position, label) {
+        const t = templates[type];
+        const id = `dev-${deviceCounter++}`;
+        const device = { id, type, label, position: position.clone() };
+
+        const geo = type === 'lidar' && !label.includes('Center') ?
+            new THREE.CylinderGeometry(t.size[0] * 0.5, t.size[0] * 0.5, t.size[1], 8) :
+            new THREE.BoxGeometry(...t.size);
+
+        const mat = new THREE.MeshPhongMaterial({
+            color: t.color, emissive: t.color, emissiveIntensity: 0.5
+        });
+
+        const group = new THREE.Group();
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.castShadow = true;
+        group.add(mesh);
+        group.add(new THREE.LineSegments(
+            new THREE.EdgesGeometry(geo),
+            new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.6, transparent: true })
+        ));
+        group.position.copy(position);
+        device.mesh = group;
+
+        state.vehicleGroup.add(group);
+        state.devices.set(id, device);
+        return device;
+    }
+
+    function createConnection(from, to) {
+        const color = from.type === 'hpc' || to.type === 'hpc' ? 0xffd700 :
+                     from.type === 'lan9692' || to.type === 'lan9692' ? 0x10B981 : 0x3B82F6;
+
+        const curve = new THREE.CatmullRomCurve3([from.position.clone(), to.position.clone()]);
+        const tube = new THREE.Mesh(
+            new THREE.TubeGeometry(curve, 8, 0.06, 6, false),
+            new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.6 })
+        );
+        state.vehicleGroup.add(tube);
+
+        const particles = [];
+        for (let i = 0; i < 2; i++) {
+            const p = new THREE.Mesh(sharedGeometries.sphere, new THREE.MeshBasicMaterial({ color: 0xffffff }));
+            p.userData = { t: i / 2, curve };
+            state.vehicleGroup.add(p);
+            particles.push(p);
+        }
+
+        state.connections.push({ from, to, tube, curve, particles });
+    }
+
+    // === LOAD SCENARIO ===
+    function loadScenario() {
+        createVehicle();
+
+        const acuIT = addDevice('hpc', new THREE.Vector3(0, 4, 0), 'ACU_IT');
+        const frontL = addDevice('lan9692', new THREE.Vector3(-3.5, 4, 10), 'Front-L-9692');
+        const frontR = addDevice('lan9692', new THREE.Vector3(3.5, 4, 10), 'Front-R-9692');
+        const rear = addDevice('lan9692', new THREE.Vector3(0, 4, -10), 'Rear-9692');
+
+        const lidarFL = addDevice('lidar', new THREE.Vector3(-8.5, 10, 16.2), 'LiDAR-FL');
+        const lidarFR = addDevice('lidar', new THREE.Vector3(8.5, 10, 16.2), 'LiDAR-FR');
+        const lidarFC = addDevice('lidar', new THREE.Vector3(0, 5.5, 18.5), 'LiDAR-FC');
+        const lidarRC = addDevice('lidar', new THREE.Vector3(0, 5.5, -18.5), 'LiDAR-RC');
+
+        const camFC = addDevice('camera', new THREE.Vector3(0, 10.5, 18.5), 'Cam-FC');
+        const camFL = addDevice('camera', new THREE.Vector3(0.6, 10.5, 18.5), 'Cam-FL');
+        const camFR = addDevice('camera', new THREE.Vector3(-0.6, 10.5, 18.5), 'Cam-FR');
+        const camSL1 = addDevice('camera', new THREE.Vector3(-8.5, 11, 16.5), 'Cam-SL1');
+        const camSR1 = addDevice('camera', new THREE.Vector3(8.5, 11, 16.5), 'Cam-SR1');
+        const camSL2 = addDevice('camera', new THREE.Vector3(-8.5, 11, 15.9), 'Cam-SL2');
+        const camSR2 = addDevice('camera', new THREE.Vector3(8.5, 11, 15.9), 'Cam-SR2');
+        const camRC = addDevice('camera', new THREE.Vector3(0, 9, -18.5), 'Cam-RC');
+
+        const radarFC = addDevice('radar', new THREE.Vector3(0, 7, 18.5), 'Radar-FC');
+        const radarFL = addDevice('radar', new THREE.Vector3(-7, 6.5, 17.5), 'Radar-FL');
+        const radarFR = addDevice('radar', new THREE.Vector3(7, 6.5, 17.5), 'Radar-FR');
+        const radarRL = addDevice('radar', new THREE.Vector3(-7, 6.5, -18), 'Radar-RL');
+        const radarRR = addDevice('radar', new THREE.Vector3(7, 6.5, -18), 'Radar-RR');
+
+        createConnection(frontL, acuIT);
+        createConnection(frontR, acuIT);
+        createConnection(rear, acuIT);
+        createConnection(frontL, frontR);
+
+        createConnection(frontL, lidarFL);
+        createConnection(frontL, lidarFC);
+        createConnection(frontL, camFL);
+        createConnection(frontL, camSL1);
+        createConnection(frontL, radarFL);
+
+        createConnection(frontR, lidarFR);
+        createConnection(frontR, camFC);
+        createConnection(frontR, camFR);
+        createConnection(frontR, camSR1);
+        createConnection(frontR, radarFC);
+        createConnection(frontR, radarFR);
+
+        createConnection(frontL, camSL2);
+        createConnection(frontR, camSR2);
+
+        createConnection(rear, lidarRC);
+        createConnection(rear, camRC);
+        createConnection(rear, radarRL);
+        createConnection(rear, radarRR);
+
+        updateStatus();
+    }
+
+    function updateStatus() {
+        document.getElementById('deviceCount').textContent = state.devices.size;
+        document.getElementById('linkCount').textContent = state.connections.length;
+        let bw = 0;
+        state.connections.forEach(c => {
+            bw += (c.from.type === 'hpc' || c.to.type === 'hpc' ||
+                   c.from.type === 'lan9692' && c.to.type === 'lan9692') ? 10 : 1;
+        });
+        document.getElementById('bandwidth').textContent = bw + ' Gbps';
+    }
+
+    // === DRIVING ===
+    function updateDrive() {
+        if (drive.keys.w) {
+            drive.speed = Math.min(drive.speed + drive.acceleration, drive.maxSpeed);
+        } else if (drive.keys.s) {
+            drive.speed = Math.max(drive.speed - drive.acceleration, -drive.maxSpeed * 0.5);
+        } else {
+            drive.speed *= 0.98;
+            if (Math.abs(drive.speed) < 0.01) drive.speed = 0;
+        }
+
+        if (drive.keys.space) drive.speed *= 0.9;
+
+        if (Math.abs(drive.speed) > 0.05) {
+            if (drive.keys.a) {
+                drive.steering = Math.min(drive.steering + 0.003, drive.maxSteering);
+            } else if (drive.keys.d) {
+                drive.steering = Math.max(drive.steering - 0.003, -drive.maxSteering);
+            } else {
+                drive.steering *= 0.85;
+            }
+        }
+
+        state.vehicleGroup.translateZ(drive.speed);
+        state.vehicleGroup.rotateY(drive.steering * (drive.speed > 0 ? 1 : -1));
+
+        updateSpeedometer(drive.speed);
+        updateAccelGraph();
+    }
+
+    function updateCamera() {
+        const offsets = [
+            new THREE.Vector3(0, 25, -60),
+            new THREE.Vector3(0, 80, 0),
+            new THREE.Vector3(70, 30, 0)
+        ];
+        const offset = offsets[state.cameraMode];
+
+        const cameraTarget = offset.clone().applyMatrix4(state.vehicleGroup.matrixWorld);
+        camera.position.lerp(cameraTarget, 0.08);
+
+        const lookTarget = new THREE.Vector3(0, 5, state.cameraMode === 1 ? 0 : 30);
+        lookTarget.applyMatrix4(state.vehicleGroup.matrixWorld);
+        camera.lookAt(lookTarget);
+    }
+
+    // === INPUT ===
+    window.addEventListener('keydown', (e) => {
+        switch (e.key.toLowerCase()) {
+            case 'w': drive.keys.w = true; break;
+            case 'a': drive.keys.a = true; break;
+            case 's': drive.keys.s = true; break;
+            case 'd': drive.keys.d = true; break;
+            case ' ': drive.keys.space = true; e.preventDefault(); break;
+            case 'v': state.cameraMode = (state.cameraMode + 1) % 3; break;
+        }
+    });
+
+    window.addEventListener('keyup', (e) => {
+        switch (e.key.toLowerCase()) {
+            case 'w': drive.keys.w = false; break;
+            case 'a': drive.keys.a = false; break;
+            case 's': drive.keys.s = false; break;
+            case 'd': drive.keys.d = false; break;
+            case ' ': drive.keys.space = false; break;
+        }
+    });
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // === UI ===
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('visible');
+        setTimeout(() => toast.classList.remove('visible'), 2500);
+    }
+
+    document.getElementById('viewBtn').addEventListener('click', () => {
+        state.cameraMode = (state.cameraMode + 1) % 3;
+        const modes = ['Follow', 'Top-Down', 'Side'];
+        showToast(`Camera: ${modes[state.cameraMode]}`);
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        state.vehicleGroup.position.set(0, 0, 0);
+        state.vehicleGroup.rotation.set(0, 0, 0);
+        drive.speed = 0;
+        drive.steering = 0;
+        showToast('Position Reset');
+    });
+
+    // === ANIMATION ===
+    function animate(currentTime) {
+        requestAnimationFrame(animate);
+
+        // Frame rate limiting for consistent performance
+        const elapsed = currentTime - lastFrameTime;
+        if (elapsed < FRAME_INTERVAL) return;
+        lastFrameTime = currentTime - (elapsed % FRAME_INTERVAL);
+
+        updateDrive();
+        updateCamera();
+
+        // Infinite environment
+        const vehiclePos = state.vehicleGroup.position;
+        gridHelper.position.x = Math.floor(vehiclePos.x / 20) * 20;
+        gridHelper.position.z = Math.floor(vehiclePos.z / 20) * 20;
+        road.position.z = Math.floor(vehiclePos.z / 1000) * 1000;
+        centerLine.position.z = road.position.z;
+
+        // Update shadow light
+        mainLight.position.x = vehiclePos.x + 50;
+        mainLight.position.z = vehiclePos.z + 50;
+        mainLight.target.position.copy(vehiclePos);
+        mainLight.target.updateMatrixWorld();
+
+        // Animate connection particles
+        state.connections.forEach(conn => {
+            conn.particles.forEach(p => {
+                p.userData.t += 0.012;
+                if (p.userData.t > 1) p.userData.t = 0;
+                p.position.copy(p.userData.curve.getPoint(p.userData.t));
+            });
+        });
+
+        renderer.render(scene, camera);
+    }
+
+    // === INIT ===
+    setupSpeedometer();
+    loadScenario();
+    requestAnimationFrame(animate);
+    </script>
+</body>
+</html>
