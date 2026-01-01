@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ROii3 - Autonomous Vehicle Simulator</title>
+    <title>ROii3 - Autonomous Vehicle Network Simulator</title>
     <script src="libs/three.min.js"></script>
     <script src="libs/OrbitControls.js"></script>
     <script src="libs/GLTFLoader.js"></script>
@@ -30,87 +30,61 @@
             align-items: center;
         }
         .title-box {
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.8);
             backdrop-filter: blur(10px);
             padding: 12px 24px;
             border-radius: 12px;
             border: 1px solid rgba(16, 185, 129, 0.3);
         }
-        .title-box h1 { font-size: 18px; color: #10B981; font-weight: 700; }
+        .title-box h1 { font-size: 16px; color: #10B981; font-weight: 700; }
         .title-box p { font-size: 11px; color: #64748b; }
 
         /* Classic Speedometer */
         .speedometer {
             position: absolute;
-            bottom: 30px;
-            right: 30px;
-            width: 280px;
-            height: 280px;
+            bottom: 25px;
+            right: 25px;
+            width: 240px;
+            height: 240px;
         }
         .speedo-bg {
             width: 100%;
             height: 100%;
             background: radial-gradient(circle at center, rgba(20,20,30,0.95) 0%, rgba(10,10,15,0.98) 100%);
             border-radius: 50%;
-            border: 4px solid #333;
-            box-shadow:
-                0 0 40px rgba(0,0,0,0.8),
-                inset 0 0 60px rgba(0,0,0,0.5),
-                0 0 2px #444;
+            border: 3px solid #333;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.5);
             position: relative;
             overflow: hidden;
         }
         .speedo-ring {
             position: absolute;
-            top: 8px; left: 8px; right: 8px; bottom: 8px;
+            top: 6px; left: 6px; right: 6px; bottom: 6px;
             border: 2px solid rgba(255,255,255,0.1);
             border-radius: 50%;
         }
-
-        /* Speed Ticks */
-        .tick-container {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-        }
+        .tick-container { position: absolute; width: 100%; height: 100%; top: 0; left: 0; }
         .tick {
             position: absolute;
-            width: 3px;
-            height: 15px;
-            background: #888;
+            width: 2px;
+            height: 12px;
+            background: #666;
             left: 50%;
-            top: 20px;
-            margin-left: -1.5px;
-            transform-origin: center 120px;
-            border-radius: 2px;
-        }
-        .tick.major {
-            width: 4px;
-            height: 22px;
-            background: #fff;
             top: 15px;
-            margin-left: -2px;
-            transform-origin: center 125px;
+            margin-left: -1px;
+            transform-origin: center 105px;
         }
+        .tick.major { width: 3px; height: 18px; background: #fff; top: 12px; transform-origin: center 108px; }
         .tick.red { background: #ef4444; }
-
-        /* Speed Labels */
         .speed-label {
             position: absolute;
-            font-size: 14px;
+            font-size: 11px;
             font-weight: 700;
-            color: #aaa;
+            color: #888;
             text-align: center;
-            width: 40px;
-            margin-left: -20px;
-            left: 50%;
-            transform-origin: center 95px;
+            width: 30px;
         }
         .speed-label.high { color: #ef4444; }
-
-        /* Needle */
         .needle-container {
             position: absolute;
             width: 100%;
@@ -121,168 +95,163 @@
         }
         .needle {
             position: absolute;
-            width: 4px;
-            height: 100px;
+            width: 3px;
+            height: 85px;
             left: 50%;
-            top: 40px;
-            margin-left: -2px;
+            top: 35px;
+            margin-left: -1.5px;
             transform-origin: center bottom;
-            background: linear-gradient(to top, #ef4444 0%, #ff6b6b 50%, #fff 100%);
+            background: linear-gradient(to top, #ef4444 0%, #ff6b6b 60%, #fff 100%);
             border-radius: 2px;
-            box-shadow: 0 0 10px rgba(239,68,68,0.5);
+            box-shadow: 0 0 8px rgba(239,68,68,0.5);
         }
         .needle-cap {
             position: absolute;
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             left: 50%;
             top: 50%;
-            margin-left: -10px;
-            margin-top: -10px;
-            background: radial-gradient(circle at 30% 30%, #666, #222);
+            margin-left: -8px;
+            margin-top: -8px;
+            background: radial-gradient(circle at 30% 30%, #555, #222);
             border-radius: 50%;
             border: 2px solid #444;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
         }
-
-        /* Digital Speed */
         .digital-speed {
             position: absolute;
-            bottom: 55px;
+            bottom: 45px;
             left: 50%;
             transform: translateX(-50%);
             text-align: center;
         }
         .digital-value {
-            font-size: 36px;
+            font-size: 28px;
             font-weight: 700;
             color: #10B981;
             font-family: 'Courier New', monospace;
-            text-shadow: 0 0 10px rgba(16,185,129,0.5);
+            text-shadow: 0 0 8px rgba(16,185,129,0.5);
         }
-        .digital-unit {
-            font-size: 12px;
-            color: #64748b;
-            letter-spacing: 2px;
-        }
-
-        /* Gear Indicator */
+        .digital-unit { font-size: 10px; color: #64748b; letter-spacing: 2px; }
         .gear-indicator {
             position: absolute;
-            bottom: 120px;
+            bottom: 100px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 700;
             color: #f59e0b;
-            text-shadow: 0 0 10px rgba(245,158,11,0.5);
         }
 
-        /* Acceleration Graph */
-        .accel-graph {
+        /* Fault Panel */
+        .fault-panel {
             position: absolute;
-            bottom: 30px;
-            left: 30px;
-            width: 200px;
-            height: 100px;
-            background: rgba(0,0,0,0.7);
+            top: 80px;
+            left: 20px;
+            width: 320px;
+            background: rgba(0,0,0,0.85);
             backdrop-filter: blur(10px);
             border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 10px;
-        }
-        .accel-title {
-            font-size: 10px;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-        .accel-canvas {
-            width: 100%;
-            height: 70px;
-        }
-
-        /* Controls Help */
-        .controls-help {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(10px);
-            padding: 12px 24px;
-            border-radius: 20px;
-            display: flex;
-            gap: 16px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .key {
-            display: inline-block;
-            background: linear-gradient(180deg, #444 0%, #222 100%);
-            padding: 5px 10px;
-            border-radius: 5px;
-            border: 1px solid #555;
-            font-weight: 600;
-            font-family: monospace;
-            font-size: 12px;
-            min-width: 24px;
-            text-align: center;
-            margin-right: 4px;
-            box-shadow: 0 2px 0 #111;
-        }
-        .control-item { font-size: 12px; color: #94a3b8; }
-
-        /* Button Group */
-        .btn-group {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 8px;
+            border: 1px solid rgba(239,68,68,0.3);
+            overflow: hidden;
             pointer-events: auto;
         }
-        .btn {
-            padding: 10px 20px;
-            border-radius: 10px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
+        .fault-header {
+            background: rgba(239,68,68,0.15);
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(239,68,68,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .fault-header h3 {
             font-size: 13px;
-            transition: all 0.2s;
-            backdrop-filter: blur(10px);
-        }
-        .btn-view {
-            background: rgba(59, 130, 246, 0.2);
-            border: 1px solid rgba(59, 130, 246, 0.4);
-            color: #60a5fa;
-        }
-        .btn-view:hover { background: rgba(59, 130, 246, 0.3); }
-        .btn-reset {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid rgba(239, 68, 68, 0.4);
             color: #f87171;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .btn-reset:hover { background: rgba(239, 68, 68, 0.3); }
+        .fault-toggle {
+            background: rgba(239,68,68,0.2);
+            border: 1px solid rgba(239,68,68,0.4);
+            color: #f87171;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .fault-toggle:hover { background: rgba(239,68,68,0.3); }
+        .fault-toggle.active { background: #ef4444; color: white; }
+        .fault-content { padding: 12px; max-height: 400px; overflow-y: auto; }
+        .fault-item {
+            background: rgba(30,30,40,0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .fault-item:hover { border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.1); }
+        .fault-item.active { border-color: #ef4444; background: rgba(239,68,68,0.2); }
+        .fault-item.recovered { border-color: #10B981; background: rgba(16,185,129,0.1); }
+        .fault-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #f8fafc;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .fault-name i { color: #ef4444; }
+        .fault-item.recovered .fault-name i { color: #10B981; }
+        .fault-desc { font-size: 11px; color: #64748b; margin-bottom: 8px; }
+        .fault-status {
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .fault-status.idle { background: rgba(100,116,139,0.3); color: #94a3b8; }
+        .fault-status.active { background: rgba(239,68,68,0.3); color: #f87171; animation: blink 1s infinite; }
+        .fault-status.recovered { background: rgba(16,185,129,0.3); color: #34d399; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .recovery-info {
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(16,185,129,0.1);
+            border: 1px solid rgba(16,185,129,0.3);
+            border-radius: 6px;
+            font-size: 10px;
+            color: #34d399;
+            display: none;
+        }
+        .recovery-info.visible { display: block; }
+        .recovery-info i { margin-right: 6px; }
 
         /* Network Status */
         .network-status {
             position: absolute;
-            top: 80px;
+            top: 20px;
             right: 20px;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.8);
             backdrop-filter: blur(10px);
             padding: 12px 16px;
             border-radius: 10px;
             border: 1px solid rgba(16,185,129,0.3);
-            min-width: 180px;
+            min-width: 160px;
+            pointer-events: auto;
         }
         .status-title {
             font-size: 10px;
             color: #64748b;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         .status-row {
             display: flex;
@@ -291,9 +260,18 @@
             font-size: 12px;
             margin-bottom: 6px;
         }
-        .status-row:last-child { margin-bottom: 0; }
         .status-label { color: #94a3b8; }
         .status-value { color: #10B981; font-weight: 600; }
+        .status-value.warning { color: #f59e0b; }
+        .status-value.danger { color: #ef4444; }
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
         .status-dot {
             width: 8px;
             height: 8px;
@@ -301,25 +279,94 @@
             background: #10B981;
             animation: pulse 2s infinite;
         }
+        .status-dot.warning { background: #f59e0b; }
+        .status-dot.danger { background: #ef4444; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* Controls */
+        .controls-help {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: flex;
+            gap: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .key {
+            display: inline-block;
+            background: linear-gradient(180deg, #444 0%, #222 100%);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #555;
+            font-weight: 600;
+            font-family: monospace;
+            font-size: 11px;
+            min-width: 22px;
+            text-align: center;
+            margin-right: 3px;
+            box-shadow: 0 2px 0 #111;
+        }
+        .control-item { font-size: 11px; color: #94a3b8; }
+
+        /* Buttons */
+        .btn-group {
+            position: absolute;
+            bottom: 80px;
+            right: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: auto;
+        }
+        .btn {
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-view {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            color: #60a5fa;
+        }
+        .btn-view:hover { background: rgba(59, 130, 246, 0.3); }
+        .btn-reset {
+            background: rgba(100, 116, 139, 0.2);
+            border: 1px solid rgba(100, 116, 139, 0.4);
+            color: #94a3b8;
+        }
+        .btn-reset:hover { background: rgba(100, 116, 139, 0.3); }
 
         /* Toast */
         .toast {
             position: fixed;
-            bottom: 150px;
+            bottom: 130px;
             left: 50%;
             transform: translateX(-50%) translateY(50px);
             padding: 12px 24px;
-            background: rgba(16, 185, 129, 0.95);
-            color: white;
             border-radius: 10px;
             font-weight: 500;
-            font-size: 14px;
+            font-size: 13px;
             opacity: 0;
             transition: all 0.3s;
             z-index: 1000;
         }
         .toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { background: rgba(16, 185, 129, 0.95); color: white; }
+        .toast.error { background: rgba(239, 68, 68, 0.95); color: white; }
+        .toast.warning { background: rgba(245, 158, 11, 0.95); color: white; }
 
         /* Loading */
         .loading {
@@ -335,15 +382,35 @@
         }
         .loading.hidden { opacity: 0; pointer-events: none; }
         .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid #222;
-            border-top: 4px solid #10B981;
+            width: 50px;
+            height: 50px;
+            border: 3px solid #222;
+            border-top: 3px solid #10B981;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .loading-text { margin-top: 20px; color: #64748b; font-size: 14px; }
+        .loading-text { margin-top: 16px; color: #64748b; font-size: 13px; }
+
+        /* Sensor Legend */
+        .sensor-legend {
+            position: absolute;
+            bottom: 25px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .legend-title { font-size: 10px; color: #64748b; margin-bottom: 8px; text-transform: uppercase; }
+        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 11px; color: #94a3b8; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+        .legend-dot.hpc { background: #E11D48; }
+        .legend-dot.switch { background: #10B981; }
+        .legend-dot.lidar { background: #22c55e; }
+        .legend-dot.radar { background: #8b5cf6; }
+        .legend-dot.camera { background: #f59e0b; }
     </style>
 </head>
 <body>
@@ -357,18 +424,25 @@
     <div class="hud">
         <div class="top-bar">
             <div class="title-box">
-                <h1><i class="fas fa-car"></i> ROii3 - Autonomous Vehicle Simulator</h1>
-                <p>ACU_IT HPC | 3x LAN9692 Zone Controllers | 17 Sensors</p>
+                <h1><i class="fas fa-car"></i> ROii3 - TSN Network Fault Simulator</h1>
+                <p>ACU_IT HPC | 3x LAN9692 Zone Controllers | LiDAR + Radar Sensors</p>
             </div>
         </div>
 
-        <div class="btn-group">
-            <button class="btn btn-view" id="viewBtn"><i class="fas fa-camera"></i> View</button>
-            <button class="btn btn-reset" id="resetBtn"><i class="fas fa-redo"></i> Reset</button>
+        <!-- Fault Injection Panel -->
+        <div class="fault-panel">
+            <div class="fault-header">
+                <h3><i class="fas fa-bolt"></i> Fault Injection</h3>
+                <button class="fault-toggle" id="clearAllFaults">Clear All</button>
+            </div>
+            <div class="fault-content" id="faultContent">
+                <!-- Fault items will be generated by JS -->
+            </div>
         </div>
 
+        <!-- Network Status -->
         <div class="network-status">
-            <div class="status-title"><i class="fas fa-network-wired"></i> Network Status</div>
+            <div class="status-title"><i class="fas fa-network-wired"></i> Network</div>
             <div class="status-row">
                 <span class="status-label">Devices</span>
                 <span class="status-value" id="deviceCount">0</span>
@@ -378,16 +452,16 @@
                 <span class="status-value" id="linkCount">0</span>
             </div>
             <div class="status-row">
-                <span class="status-label">Bandwidth</span>
-                <span class="status-value" id="bandwidth">0 Gbps</span>
+                <span class="status-label">Active Faults</span>
+                <span class="status-value" id="faultCount">0</span>
             </div>
-            <div class="status-row">
-                <span class="status-label">Status</span>
-                <div class="status-dot"></div>
+            <div class="status-indicator">
+                <div class="status-dot" id="statusDot"></div>
+                <span class="status-label" id="statusText">All Systems Normal</span>
             </div>
         </div>
 
-        <!-- Classic Speedometer -->
+        <!-- Speedometer -->
         <div class="speedometer">
             <div class="speedo-bg">
                 <div class="speedo-ring"></div>
@@ -396,7 +470,7 @@
                     <div class="needle"></div>
                 </div>
                 <div class="needle-cap"></div>
-                <div class="gear-indicator" id="gearIndicator">D</div>
+                <div class="gear-indicator" id="gearIndicator">N</div>
                 <div class="digital-speed">
                     <div class="digital-value" id="digitalSpeed">0</div>
                     <div class="digital-unit">KM/H</div>
@@ -404,60 +478,57 @@
             </div>
         </div>
 
-        <!-- Acceleration Graph -->
-        <div class="accel-graph">
-            <div class="accel-title"><i class="fas fa-chart-line"></i> Acceleration</div>
-            <canvas id="accelCanvas" class="accel-canvas"></canvas>
+        <!-- Buttons -->
+        <div class="btn-group">
+            <button class="btn btn-view" id="viewBtn"><i class="fas fa-camera"></i> View</button>
+            <button class="btn btn-reset" id="resetBtn"><i class="fas fa-redo"></i> Reset</button>
         </div>
 
+        <!-- Controls -->
         <div class="controls-help">
-            <span class="control-item"><span class="key">W</span> Forward</span>
-            <span class="control-item"><span class="key">S</span> Reverse</span>
-            <span class="control-item"><span class="key">A</span><span class="key">D</span> Steer</span>
-            <span class="control-item"><span class="key">Space</span> Brake</span>
-            <span class="control-item"><span class="key">V</span> Camera</span>
+            <span class="control-item"><span class="key">W</span>Forward</span>
+            <span class="control-item"><span class="key">S</span>Reverse</span>
+            <span class="control-item"><span class="key">A</span><span class="key">D</span>Steer</span>
+            <span class="control-item"><span class="key">Space</span>Brake</span>
+            <span class="control-item"><span class="key">V</span>Camera</span>
+        </div>
+
+        <!-- Legend -->
+        <div class="sensor-legend">
+            <div class="legend-title">Components</div>
+            <div class="legend-item"><div class="legend-dot hpc"></div>HPC (ACU_IT)</div>
+            <div class="legend-item"><div class="legend-dot switch"></div>Zone Controller</div>
+            <div class="legend-item"><div class="legend-dot lidar"></div>LiDAR</div>
+            <div class="legend-item"><div class="legend-dot radar"></div>Radar</div>
         </div>
     </div>
 
     <div class="toast" id="toast"></div>
 
     <script>
-    // ROii3 - Optimized Autonomous Vehicle Simulator
+    // ============================================
+    // ROii3 - TSN Network Fault Simulator
+    // ============================================
 
-    // === Performance Optimizations ===
-    const FRAME_INTERVAL = 1000 / 60; // 60 FPS target
+    const FRAME_INTERVAL = 1000 / 60;
     let lastFrameTime = 0;
-
-    // Shared geometries for performance
-    const sharedGeometries = {
-        sphere: new THREE.SphereGeometry(0.15, 6, 6),
-        cylinder: new THREE.CylinderGeometry(0.5, 0.5, 1, 8),
-        box: new THREE.BoxGeometry(1, 1, 1)
-    };
 
     // === THREE.JS SETUP ===
     const scene = new THREE.Scene();
-
-    // Optimized background
     scene.background = new THREE.Color(0x050510);
     scene.fog = new THREE.FogExp2(0x050510, 0.002);
 
-    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 800);
-
-    const renderer = new THREE.WebGLRenderer({
-        antialias: true,
-        powerPreference: 'high-performance'
-    });
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 800);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit pixel ratio
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     document.getElementById('canvas3d').appendChild(renderer.domElement);
 
-    // === LIGHTING - Optimized ===
-    scene.add(new THREE.AmbientLight(0xffffff, 1.0));
-
-    const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    // === LIGHTING ===
+    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+    const mainLight = new THREE.DirectionalLight(0xffffff, 1.0);
     mainLight.position.set(50, 80, 50);
     mainLight.castShadow = true;
     mainLight.shadow.mapSize.width = 2048;
@@ -469,29 +540,28 @@
     mainLight.shadow.camera.top = 80;
     mainLight.shadow.camera.bottom = -80;
     scene.add(mainLight);
-
-    scene.add(new THREE.DirectionalLight(0x8080ff, 0.4).position.set(-30, 30, -30));
+    scene.add(new THREE.DirectionalLight(0x8080ff, 0.3).position.set(-30, 30, -30));
 
     // === ENVIRONMENT ===
-    // Optimized grid
     const gridHelper = new THREE.GridHelper(1000, 50, 0x10B981, 0x111);
-    gridHelper.material.opacity = 0.15;
+    gridHelper.material.opacity = 0.12;
     gridHelper.material.transparent = true;
     gridHelper.position.y = -1;
     scene.add(gridHelper);
 
-    // Road
-    const roadGeo = new THREE.PlaneGeometry(30, 2000);
-    const roadMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
-    const road = new THREE.Mesh(roadGeo, roadMat);
+    const road = new THREE.Mesh(
+        new THREE.PlaneGeometry(30, 2000),
+        new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 })
+    );
     road.rotation.x = -Math.PI / 2;
     road.position.y = -0.5;
     road.receiveShadow = true;
     scene.add(road);
 
-    // Road lines
-    const lineMat = new THREE.MeshBasicMaterial({ color: 0xffd700 });
-    const centerLine = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 2000), lineMat);
+    const centerLine = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.3, 2000),
+        new THREE.MeshBasicMaterial({ color: 0xffd700 })
+    );
     centerLine.rotation.x = -Math.PI / 2;
     centerLine.position.y = -0.45;
     scene.add(centerLine);
@@ -501,13 +571,13 @@
         vehicleGroup: new THREE.Group(),
         devices: new Map(),
         connections: [],
+        activeFaults: new Set(),
         cameraMode: 0
     };
     scene.add(state.vehicleGroup);
 
     const drive = {
         speed: 0,
-        prevSpeed: 0,
         maxSpeed: 2.5,
         acceleration: 0.05,
         steering: 0,
@@ -515,118 +585,85 @@
         keys: { w: false, a: false, s: false, d: false, space: false }
     };
 
-    // Acceleration history for graph
-    const accelHistory = new Array(50).fill(0);
-    let accelCanvas, accelCtx;
-
-    // === SPEEDOMETER SETUP ===
-    function setupSpeedometer() {
-        const container = document.getElementById('tickContainer');
-        const minAngle = -135;
-        const maxAngle = 135;
-        const maxSpeed = 200;
-
-        // Create ticks
-        for (let speed = 0; speed <= maxSpeed; speed += 10) {
-            const angle = minAngle + (speed / maxSpeed) * (maxAngle - minAngle);
-            const isMajor = speed % 20 === 0;
-
-            const tick = document.createElement('div');
-            tick.className = 'tick' + (isMajor ? ' major' : '') + (speed >= 160 ? ' red' : '');
-            tick.style.transform = `rotate(${angle}deg)`;
-            container.appendChild(tick);
-
-            if (isMajor) {
-                const label = document.createElement('div');
-                label.className = 'speed-label' + (speed >= 160 ? ' high' : '');
-                label.textContent = speed;
-                const labelAngle = angle;
-                const radius = 95;
-                const rad = (labelAngle - 90) * Math.PI / 180;
-                const x = 140 + radius * Math.cos(rad);
-                const y = 140 + radius * Math.sin(rad);
-                label.style.left = x + 'px';
-                label.style.top = y + 'px';
-                label.style.marginLeft = '-20px';
-                label.style.marginTop = '-10px';
-                label.style.transform = 'none';
-                container.appendChild(label);
+    // === FAULT SCENARIOS ===
+    const faultScenarios = [
+        {
+            id: 'backbone-10g',
+            name: 'Front Zone 10G Backbone',
+            desc: 'Front-L ↔ Front-R 10Gbps backbone link failure',
+            affectedLinks: ['Front-L-9692', 'Front-R-9692'],
+            type: 'link',
+            recovery: {
+                method: 'Reroute via HPC',
+                path: 'Front-L → ACU_IT → Front-R',
+                time: '< 50ms'
+            }
+        },
+        {
+            id: 'front-l-hpc',
+            name: 'Front-L → HPC Link',
+            desc: 'Front-L zone controller to HPC uplink failure',
+            affectedLinks: ['Front-L-9692', 'ACU_IT'],
+            type: 'link',
+            recovery: {
+                method: 'Reroute via Front-R backbone',
+                path: 'Front-L → Front-R → ACU_IT',
+                time: '< 50ms'
+            }
+        },
+        {
+            id: 'rear-hpc',
+            name: 'Rear → HPC Link',
+            desc: 'Rear zone controller to HPC uplink failure',
+            affectedLinks: ['Rear-9692', 'ACU_IT'],
+            type: 'link',
+            recovery: {
+                method: 'Limited connectivity',
+                path: 'Rear sensors degraded mode',
+                time: 'Manual intervention required'
+            }
+        },
+        {
+            id: 'lidar-fl',
+            name: 'LiDAR-FL Sensor',
+            desc: 'Front-left LiDAR sensor malfunction',
+            affectedDevices: ['LiDAR-FL'],
+            type: 'sensor',
+            recovery: {
+                method: 'Sensor fusion fallback',
+                path: 'Use LiDAR-FC + Radar-FL',
+                time: 'Immediate'
+            }
+        },
+        {
+            id: 'radar-front',
+            name: 'Front Radar Cluster',
+            desc: 'All front radar sensors offline',
+            affectedDevices: ['Radar-FL', 'Radar-FC', 'Radar-FR'],
+            type: 'sensor',
+            recovery: {
+                method: 'LiDAR-only mode',
+                path: 'Increase LiDAR polling rate',
+                time: 'Immediate (degraded)'
             }
         }
-
-        // Setup acceleration canvas
-        accelCanvas = document.getElementById('accelCanvas');
-        accelCanvas.width = 180;
-        accelCanvas.height = 70;
-        accelCtx = accelCanvas.getContext('2d');
-    }
-
-    function updateSpeedometer(speed) {
-        const displaySpeed = Math.abs(speed * 50);
-        const clampedSpeed = Math.min(displaySpeed, 200);
-
-        // Update needle
-        const minAngle = -135;
-        const maxAngle = 135;
-        const angle = minAngle + (clampedSpeed / 200) * (maxAngle - minAngle);
-        document.getElementById('needleContainer').style.transform = `rotate(${angle}deg)`;
-
-        // Update digital display
-        document.getElementById('digitalSpeed').textContent = displaySpeed.toFixed(0);
-
-        // Update gear indicator
-        const gear = speed < 0 ? 'R' : speed === 0 ? 'N' : 'D';
-        document.getElementById('gearIndicator').textContent = gear;
-    }
-
-    function updateAccelGraph() {
-        const accel = drive.speed - drive.prevSpeed;
-        accelHistory.shift();
-        accelHistory.push(accel * 100);
-        drive.prevSpeed = drive.speed;
-
-        if (!accelCtx) return;
-
-        accelCtx.fillStyle = 'rgba(0,0,0,0.3)';
-        accelCtx.fillRect(0, 0, 180, 70);
-
-        // Grid lines
-        accelCtx.strokeStyle = 'rgba(255,255,255,0.1)';
-        accelCtx.beginPath();
-        accelCtx.moveTo(0, 35);
-        accelCtx.lineTo(180, 35);
-        accelCtx.stroke();
-
-        // Acceleration line
-        accelCtx.strokeStyle = '#10B981';
-        accelCtx.lineWidth = 2;
-        accelCtx.beginPath();
-
-        for (let i = 0; i < accelHistory.length; i++) {
-            const x = (i / accelHistory.length) * 180;
-            const y = 35 - accelHistory[i] * 20;
-            if (i === 0) accelCtx.moveTo(x, y);
-            else accelCtx.lineTo(x, y);
-        }
-        accelCtx.stroke();
-
-        // Fill under curve
-        accelCtx.lineTo(180, 35);
-        accelCtx.lineTo(0, 35);
-        accelCtx.fillStyle = 'rgba(16, 185, 129, 0.2)';
-        accelCtx.fill();
-    }
+    ];
 
     // === DEVICE TEMPLATES ===
     const templates = {
-        lan9692: { color: 0x10B981, size: [4, 2, 4] },
-        hpc: { color: 0xE11D48, size: [5, 2.5, 5] },
-        camera: { color: 0xd66b00, size: [0.8, 0.8, 0.8] },
-        lidar: { color: 0x10B981, size: [1.2, 1.2, 1.2] },
-        radar: { color: 0x952aff, size: [1.2, 1.2, 1.2] }
+        hpc: { color: 0xE11D48, emissive: 0xE11D48, size: [4, 2, 3] },
+        lan9692: { color: 0x10B981, emissive: 0x10B981, size: [3, 1.5, 2.5] },
+        lidar: { color: 0x22c55e, emissive: 0x22c55e, size: [1, 1, 1] },
+        radar: { color: 0x8b5cf6, emissive: 0x8b5cf6, size: [0.8, 0.5, 0.8] }
     };
 
-    // === VEHICLE ===
+    // Shared geometries
+    const sharedGeo = {
+        sphere: new THREE.SphereGeometry(0.12, 6, 6),
+        particle: new THREE.SphereGeometry(0.08, 4, 4)
+    };
+
+    // === VEHICLE CREATION ===
     function createVehicle() {
         const loader = new THREE.GLTFLoader();
         loader.load('./roii.glb',
@@ -636,26 +673,22 @@
                 const size = box.getSize(new THREE.Vector3());
                 const center = box.getCenter(new THREE.Vector3());
 
-                const scale = 40 / Math.max(size.x, size.y, size.z);
+                const scale = 38 / Math.max(size.x, size.y, size.z);
                 model.scale.set(scale, scale, scale);
-                model.position.set(-center.x, -center.y + size.y * scale * 0.5 + 0.5, -center.z);
+                model.position.set(-center.x * scale, -box.min.y * scale + 0.5, -center.z * scale);
 
                 model.traverse((child) => {
                     if (child.isMesh) {
+                        child.material = child.material.clone();
                         child.material.transparent = true;
-                        child.material.opacity = 0.85;
+                        child.material.opacity = 0.8;
                         child.castShadow = true;
-                        if (child.material.color) {
-                            child.material.color.multiplyScalar(1.3);
-                        }
-                        child.material.emissive = new THREE.Color(0x222222);
-                        child.material.emissiveIntensity = 0.2;
                     }
                 });
 
                 state.vehicleGroup.add(model);
                 document.getElementById('loading').classList.add('hidden');
-                showToast('Vehicle loaded! Use WASD to drive');
+                showToast('Vehicle loaded - Use WASD to drive', 'success');
             },
             (progress) => {
                 const pct = (progress.loaded / progress.total * 100).toFixed(0);
@@ -670,160 +703,381 @@
 
     function createProceduralVehicle() {
         const mat = new THREE.MeshPhysicalMaterial({
-            color: 0xf0f4f8, transparent: true, opacity: 0.75,
-            metalness: 0.1, roughness: 0.2, clearcoat: 0.5
+            color: 0xe8e8e8, transparent: true, opacity: 0.7,
+            metalness: 0.2, roughness: 0.3, clearcoat: 0.4
         });
 
-        const chassis = new THREE.Mesh(new THREE.BoxGeometry(16, 10, 36), mat);
-        chassis.position.y = 6;
-        chassis.castShadow = true;
-        state.vehicleGroup.add(chassis);
+        // Body
+        const body = new THREE.Mesh(new THREE.BoxGeometry(14, 4, 32), mat);
+        body.position.set(0, 4, 0);
+        body.castShadow = true;
+        state.vehicleGroup.add(body);
 
-        const roof = new THREE.Mesh(new THREE.BoxGeometry(14, 4, 30), mat.clone());
-        roof.position.y = 13;
-        roof.castShadow = true;
-        state.vehicleGroup.add(roof);
+        // Cabin
+        const cabin = new THREE.Mesh(new THREE.BoxGeometry(12, 4, 16), mat.clone());
+        cabin.position.set(0, 8, -2);
+        cabin.castShadow = true;
+        state.vehicleGroup.add(cabin);
 
-        const wheelGeo = new THREE.CylinderGeometry(2.5, 2.5, 1.5, 16);
-        const wheelMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a });
+        // Wheels
+        const wheelGeo = new THREE.CylinderGeometry(2, 2, 1.2, 16);
         wheelGeo.rotateZ(Math.PI / 2);
-
-        [[-8, 2.5, 12], [8, 2.5, 12], [-8, 2.5, -12], [8, 2.5, -12]].forEach(pos => {
+        const wheelMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+        [[-7.5, 2, 10], [7.5, 2, 10], [-7.5, 2, -10], [7.5, 2, -10]].forEach(pos => {
             const wheel = new THREE.Mesh(wheelGeo, wheelMat);
             wheel.position.set(...pos);
             wheel.castShadow = true;
             state.vehicleGroup.add(wheel);
         });
 
-        const front = new THREE.Mesh(new THREE.BoxGeometry(14, 2, 0.5), new THREE.MeshBasicMaterial({ color: 0x10B981 }));
-        front.position.set(0, 6, 18.1);
-        state.vehicleGroup.add(front);
+        // Front/Rear lights
+        const frontLight = new THREE.Mesh(
+            new THREE.BoxGeometry(12, 1, 0.3),
+            new THREE.MeshBasicMaterial({ color: 0x10B981 })
+        );
+        frontLight.position.set(0, 4, 16.2);
+        state.vehicleGroup.add(frontLight);
 
-        const rear = new THREE.Mesh(new THREE.BoxGeometry(14, 2, 0.5), new THREE.MeshBasicMaterial({ color: 0xEF4444 }));
-        rear.position.set(0, 6, -18.1);
-        state.vehicleGroup.add(rear);
+        const rearLight = new THREE.Mesh(
+            new THREE.BoxGeometry(12, 1, 0.3),
+            new THREE.MeshBasicMaterial({ color: 0xef4444 })
+        );
+        rearLight.position.set(0, 4, -16.2);
+        state.vehicleGroup.add(rearLight);
     }
 
-    // === DEVICES & CONNECTIONS ===
-    let deviceCounter = 1;
+    // === DEVICE & CONNECTION MANAGEMENT ===
+    let deviceCounter = 0;
 
     function addDevice(type, position, label) {
         const t = templates[type];
-        const id = `dev-${deviceCounter++}`;
-        const device = { id, type, label, position: position.clone() };
+        const id = `dev-${++deviceCounter}`;
+        const device = { id, type, label, position: position.clone(), status: 'normal', originalColor: t.color };
 
-        const geo = type === 'lidar' && !label.includes('Center') ?
-            new THREE.CylinderGeometry(t.size[0] * 0.5, t.size[0] * 0.5, t.size[1], 8) :
-            new THREE.BoxGeometry(...t.size);
+        // Create mesh
+        let geo;
+        if (type === 'lidar') {
+            geo = new THREE.CylinderGeometry(t.size[0] * 0.4, t.size[0] * 0.5, t.size[1], 12);
+        } else if (type === 'radar') {
+            geo = new THREE.ConeGeometry(t.size[0] * 0.5, t.size[1], 8);
+            geo.rotateX(Math.PI);
+        } else {
+            geo = new THREE.BoxGeometry(...t.size);
+        }
 
         const mat = new THREE.MeshPhongMaterial({
-            color: t.color, emissive: t.color, emissiveIntensity: 0.5
+            color: t.color,
+            emissive: t.emissive,
+            emissiveIntensity: 0.4,
+            shininess: 30
         });
 
         const group = new THREE.Group();
         const mesh = new THREE.Mesh(geo, mat);
         mesh.castShadow = true;
         group.add(mesh);
+
+        // Edge highlight
         group.add(new THREE.LineSegments(
             new THREE.EdgesGeometry(geo),
-            new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.6, transparent: true })
+            new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5, transparent: true })
         ));
+
         group.position.copy(position);
         device.mesh = group;
+        device.material = mat;
 
         state.vehicleGroup.add(group);
         state.devices.set(id, device);
         return device;
     }
 
-    function createConnection(from, to) {
-        const color = from.type === 'hpc' || to.type === 'hpc' ? 0xffd700 :
-                     from.type === 'lan9692' || to.type === 'lan9692' ? 0x10B981 : 0x3B82F6;
+    function createConnection(from, to, bandwidth = '1G') {
+        const is10G = bandwidth === '10G' ||
+                      (from.type === 'hpc' || to.type === 'hpc') ||
+                      (from.type === 'lan9692' && to.type === 'lan9692');
+
+        const color = is10G ? 0xfbbf24 : 0x10B981;
+        const radius = is10G ? 0.08 : 0.05;
 
         const curve = new THREE.CatmullRomCurve3([from.position.clone(), to.position.clone()]);
         const tube = new THREE.Mesh(
-            new THREE.TubeGeometry(curve, 8, 0.06, 6, false),
+            new THREE.TubeGeometry(curve, 8, radius, 6, false),
             new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.6 })
         );
         state.vehicleGroup.add(tube);
 
+        // Data flow particles
         const particles = [];
-        for (let i = 0; i < 2; i++) {
-            const p = new THREE.Mesh(sharedGeometries.sphere, new THREE.MeshBasicMaterial({ color: 0xffffff }));
-            p.userData = { t: i / 2, curve };
+        const particleCount = is10G ? 3 : 2;
+        for (let i = 0; i < particleCount; i++) {
+            const p = new THREE.Mesh(
+                sharedGeo.particle,
+                new THREE.MeshBasicMaterial({ color: 0xffffff })
+            );
+            p.userData = { t: i / particleCount, curve, speed: is10G ? 0.015 : 0.01 };
             state.vehicleGroup.add(p);
             particles.push(p);
         }
 
-        state.connections.push({ from, to, tube, curve, particles });
+        const conn = {
+            from, to, tube, curve, particles,
+            bandwidth: is10G ? '10G' : '1G',
+            status: 'normal',
+            originalColor: color
+        };
+        state.connections.push(conn);
+        return conn;
     }
 
-    // === LOAD SCENARIO ===
+    // === LOAD NETWORK SCENARIO ===
     function loadScenario() {
         createVehicle();
 
-        // HPC at rear of vehicle
-        const acuIT = addDevice('hpc', new THREE.Vector3(0, 4, -12), 'ACU_IT');
+        // === NETWORK COMPONENTS ===
+        // HPC - rear trunk area
+        const acuIT = addDevice('hpc', new THREE.Vector3(0, 5, -13), 'ACU_IT');
 
         // Zone Controllers
-        const frontL = addDevice('lan9692', new THREE.Vector3(-3.5, 4, 10), 'Front-L-9692');
-        const frontR = addDevice('lan9692', new THREE.Vector3(3.5, 4, 10), 'Front-R-9692');
-        const rear = addDevice('lan9692', new THREE.Vector3(0, 4, -6), 'Rear-9692');
+        const frontL = addDevice('lan9692', new THREE.Vector3(-4, 5, 8), 'Front-L-9692');
+        const frontR = addDevice('lan9692', new THREE.Vector3(4, 5, 8), 'Front-R-9692');
+        const rear = addDevice('lan9692', new THREE.Vector3(0, 5, -8), 'Rear-9692');
 
-        // LiDAR sensors
-        const lidarFL = addDevice('lidar', new THREE.Vector3(-8.5, 10, 16.2), 'LiDAR-FL');
-        const lidarFR = addDevice('lidar', new THREE.Vector3(8.5, 10, 16.2), 'LiDAR-FR');
-        const lidarFC = addDevice('lidar', new THREE.Vector3(0, 5.5, 18.5), 'LiDAR-FC');
-        const lidarRC = addDevice('lidar', new THREE.Vector3(0, 5.5, -18.5), 'LiDAR-RC');
+        // === SENSORS - Positioned on vehicle body ===
+        // LiDAR: Roof corners and bumpers
+        const lidarFL = addDevice('lidar', new THREE.Vector3(-6, 11, 12), 'LiDAR-FL');
+        const lidarFR = addDevice('lidar', new THREE.Vector3(6, 11, 12), 'LiDAR-FR');
+        const lidarFC = addDevice('lidar', new THREE.Vector3(0, 5, 16), 'LiDAR-FC');
+        const lidarRC = addDevice('lidar', new THREE.Vector3(0, 5, -16), 'LiDAR-RC');
 
-        // Cameras (visual only, no connections)
-        addDevice('camera', new THREE.Vector3(0, 10.5, 18.5), 'Cam-FC');
-        addDevice('camera', new THREE.Vector3(0.6, 10.5, 18.5), 'Cam-FL');
-        addDevice('camera', new THREE.Vector3(-0.6, 10.5, 18.5), 'Cam-FR');
-        addDevice('camera', new THREE.Vector3(-8.5, 11, 16.5), 'Cam-SL1');
-        addDevice('camera', new THREE.Vector3(8.5, 11, 16.5), 'Cam-SR1');
-        addDevice('camera', new THREE.Vector3(-8.5, 11, 15.9), 'Cam-SL2');
-        addDevice('camera', new THREE.Vector3(8.5, 11, 15.9), 'Cam-SR2');
-        addDevice('camera', new THREE.Vector3(0, 9, -18.5), 'Cam-RC');
+        // Radar: Bumper level, corners
+        const radarFL = addDevice('radar', new THREE.Vector3(-6, 3, 15), 'Radar-FL');
+        const radarFC = addDevice('radar', new THREE.Vector3(0, 3, 16), 'Radar-FC');
+        const radarFR = addDevice('radar', new THREE.Vector3(6, 3, 15), 'Radar-FR');
+        const radarRL = addDevice('radar', new THREE.Vector3(-6, 3, -15), 'Radar-RL');
+        const radarRR = addDevice('radar', new THREE.Vector3(6, 3, -15), 'Radar-RR');
 
-        // Radar sensors
-        const radarFC = addDevice('radar', new THREE.Vector3(0, 7, 18.5), 'Radar-FC');
-        const radarFL = addDevice('radar', new THREE.Vector3(-7, 6.5, 17.5), 'Radar-FL');
-        const radarFR = addDevice('radar', new THREE.Vector3(7, 6.5, 17.5), 'Radar-FR');
-        const radarRL = addDevice('radar', new THREE.Vector3(-7, 6.5, -18), 'Radar-RL');
-        const radarRR = addDevice('radar', new THREE.Vector3(7, 6.5, -18), 'Radar-RR');
+        // === NETWORK CONNECTIONS ===
+        // Backbone (10G)
+        createConnection(frontL, acuIT, '10G');
+        createConnection(frontR, acuIT, '10G');
+        createConnection(rear, acuIT, '10G');
+        createConnection(frontL, frontR, '10G');  // Front backbone
 
-        // Zone Controller Backbone (10G)
-        createConnection(frontL, acuIT);
-        createConnection(frontR, acuIT);
-        createConnection(rear, acuIT);
-        createConnection(frontL, frontR);
-
-        // LiDAR connections
+        // LiDAR to Zone Controllers
         createConnection(frontL, lidarFL);
         createConnection(frontL, lidarFC);
         createConnection(frontR, lidarFR);
         createConnection(rear, lidarRC);
 
-        // Radar connections
+        // Radar to Zone Controllers
         createConnection(frontL, radarFL);
         createConnection(frontR, radarFC);
         createConnection(frontR, radarFR);
         createConnection(rear, radarRL);
         createConnection(rear, radarRR);
 
-        updateStatus();
+        // Initialize fault panel UI
+        initFaultPanel();
+        updateNetworkStatus();
     }
 
-    function updateStatus() {
+    // === FAULT MANAGEMENT ===
+    function initFaultPanel() {
+        const container = document.getElementById('faultContent');
+        container.innerHTML = '';
+
+        faultScenarios.forEach(fault => {
+            const item = document.createElement('div');
+            item.className = 'fault-item';
+            item.dataset.faultId = fault.id;
+            item.innerHTML = `
+                <div class="fault-name">
+                    <i class="fas fa-${fault.type === 'link' ? 'link' : 'satellite-dish'}"></i>
+                    ${fault.name}
+                </div>
+                <div class="fault-desc">${fault.desc}</div>
+                <span class="fault-status idle">Click to inject</span>
+                <div class="recovery-info" id="recovery-${fault.id}">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Recovery:</strong> ${fault.recovery.method}<br>
+                    <i class="fas fa-route"></i> ${fault.recovery.path}<br>
+                    <i class="fas fa-clock"></i> ${fault.recovery.time}
+                </div>
+            `;
+            item.addEventListener('click', () => toggleFault(fault.id));
+            container.appendChild(item);
+        });
+    }
+
+    function toggleFault(faultId) {
+        if (state.activeFaults.has(faultId)) {
+            clearFault(faultId);
+        } else {
+            injectFault(faultId);
+        }
+    }
+
+    function injectFault(faultId) {
+        const fault = faultScenarios.find(f => f.id === faultId);
+        if (!fault) return;
+
+        state.activeFaults.add(faultId);
+
+        // Update UI
+        const item = document.querySelector(`[data-fault-id="${faultId}"]`);
+        item.classList.add('active');
+        item.querySelector('.fault-status').className = 'fault-status active';
+        item.querySelector('.fault-status').textContent = 'ACTIVE';
+
+        // Apply visual effects
+        if (fault.type === 'link') {
+            fault.affectedLinks.forEach((label, idx) => {
+                if (idx < fault.affectedLinks.length - 1) {
+                    const nextLabel = fault.affectedLinks[idx + 1];
+                    state.connections.forEach(conn => {
+                        if ((conn.from.label === label && conn.to.label === nextLabel) ||
+                            (conn.from.label === nextLabel && conn.to.label === label)) {
+                            setConnectionFault(conn, true);
+                        }
+                    });
+                }
+            });
+        } else if (fault.type === 'sensor') {
+            fault.affectedDevices.forEach(label => {
+                state.devices.forEach(device => {
+                    if (device.label === label) {
+                        setDeviceFault(device, true);
+                    }
+                });
+            });
+        }
+
+        // Show recovery after delay
+        setTimeout(() => {
+            if (state.activeFaults.has(faultId)) {
+                document.getElementById(`recovery-${faultId}`).classList.add('visible');
+                item.classList.add('recovered');
+                item.querySelector('.fault-status').className = 'fault-status recovered';
+                item.querySelector('.fault-status').textContent = 'RECOVERED';
+                showToast(`Recovery: ${fault.recovery.method}`, 'success');
+            }
+        }, 2000);
+
+        showToast(`FAULT: ${fault.name}`, 'error');
+        updateNetworkStatus();
+    }
+
+    function clearFault(faultId) {
+        const fault = faultScenarios.find(f => f.id === faultId);
+        if (!fault) return;
+
+        state.activeFaults.delete(faultId);
+
+        // Update UI
+        const item = document.querySelector(`[data-fault-id="${faultId}"]`);
+        item.classList.remove('active', 'recovered');
+        item.querySelector('.fault-status').className = 'fault-status idle';
+        item.querySelector('.fault-status').textContent = 'Click to inject';
+        document.getElementById(`recovery-${faultId}`).classList.remove('visible');
+
+        // Clear visual effects
+        if (fault.type === 'link') {
+            state.connections.forEach(conn => setConnectionFault(conn, false));
+        } else if (fault.type === 'sensor') {
+            fault.affectedDevices.forEach(label => {
+                state.devices.forEach(device => {
+                    if (device.label === label) {
+                        setDeviceFault(device, false);
+                    }
+                });
+            });
+        }
+
+        showToast('Fault cleared', 'success');
+        updateNetworkStatus();
+    }
+
+    function setConnectionFault(conn, isFault) {
+        if (isFault) {
+            conn.status = 'fault';
+            conn.tube.material.color.setHex(0xef4444);
+            conn.tube.material.opacity = 0.3;
+            conn.particles.forEach(p => p.visible = false);
+        } else {
+            conn.status = 'normal';
+            conn.tube.material.color.setHex(conn.originalColor);
+            conn.tube.material.opacity = 0.6;
+            conn.particles.forEach(p => p.visible = true);
+        }
+    }
+
+    function setDeviceFault(device, isFault) {
+        if (isFault) {
+            device.status = 'fault';
+            device.material.color.setHex(0xef4444);
+            device.material.emissive.setHex(0xef4444);
+        } else {
+            device.status = 'normal';
+            device.material.color.setHex(device.originalColor);
+            device.material.emissive.setHex(device.originalColor);
+        }
+    }
+
+    function clearAllFaults() {
+        [...state.activeFaults].forEach(faultId => clearFault(faultId));
+    }
+
+    function updateNetworkStatus() {
         document.getElementById('deviceCount').textContent = state.devices.size;
         document.getElementById('linkCount').textContent = state.connections.length;
-        let bw = 0;
-        state.connections.forEach(c => {
-            bw += (c.from.type === 'hpc' || c.to.type === 'hpc' ||
-                   c.from.type === 'lan9692' && c.to.type === 'lan9692') ? 10 : 1;
-        });
-        document.getElementById('bandwidth').textContent = bw + ' Gbps';
+        document.getElementById('faultCount').textContent = state.activeFaults.size;
+
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+
+        if (state.activeFaults.size === 0) {
+            statusDot.className = 'status-dot';
+            statusText.textContent = 'All Systems Normal';
+        } else {
+            statusDot.className = 'status-dot warning';
+            statusText.textContent = `${state.activeFaults.size} Fault(s) Active`;
+        }
+    }
+
+    // === SPEEDOMETER ===
+    function setupSpeedometer() {
+        const container = document.getElementById('tickContainer');
+        const minAngle = -135, maxAngle = 135, maxSpeed = 200;
+
+        for (let speed = 0; speed <= maxSpeed; speed += 10) {
+            const angle = minAngle + (speed / maxSpeed) * (maxAngle - minAngle);
+            const isMajor = speed % 20 === 0;
+
+            const tick = document.createElement('div');
+            tick.className = 'tick' + (isMajor ? ' major' : '') + (speed >= 160 ? ' red' : '');
+            tick.style.transform = `rotate(${angle}deg)`;
+            container.appendChild(tick);
+
+            if (isMajor) {
+                const label = document.createElement('div');
+                label.className = 'speed-label' + (speed >= 160 ? ' high' : '');
+                label.textContent = speed;
+                const rad = (angle - 90) * Math.PI / 180;
+                const r = 80;
+                label.style.left = (120 + r * Math.cos(rad) - 15) + 'px';
+                label.style.top = (120 + r * Math.sin(rad) - 8) + 'px';
+                container.appendChild(label);
+            }
+        }
+    }
+
+    function updateSpeedometer(speed) {
+        const displaySpeed = Math.abs(speed * 50);
+        const angle = -135 + (Math.min(displaySpeed, 200) / 200) * 270;
+        document.getElementById('needleContainer').style.transform = `rotate(${angle}deg)`;
+        document.getElementById('digitalSpeed').textContent = displaySpeed.toFixed(0);
+        document.getElementById('gearIndicator').textContent = speed < 0 ? 'R' : speed === 0 ? 'N' : 'D';
     }
 
     // === DRIVING ===
@@ -840,58 +1094,49 @@
         if (drive.keys.space) drive.speed *= 0.9;
 
         if (Math.abs(drive.speed) > 0.05) {
-            if (drive.keys.a) {
-                drive.steering = Math.min(drive.steering + 0.003, drive.maxSteering);
-            } else if (drive.keys.d) {
-                drive.steering = Math.max(drive.steering - 0.003, -drive.maxSteering);
-            } else {
-                drive.steering *= 0.85;
-            }
+            if (drive.keys.a) drive.steering = Math.min(drive.steering + 0.003, drive.maxSteering);
+            else if (drive.keys.d) drive.steering = Math.max(drive.steering - 0.003, -drive.maxSteering);
+            else drive.steering *= 0.85;
         }
 
         state.vehicleGroup.translateZ(drive.speed);
         state.vehicleGroup.rotateY(drive.steering * (drive.speed > 0 ? 1 : -1));
-
         updateSpeedometer(drive.speed);
-        updateAccelGraph();
     }
 
     function updateCamera() {
         const offsets = [
-            new THREE.Vector3(0, 25, -60),
-            new THREE.Vector3(0, 80, 0),
-            new THREE.Vector3(70, 30, 0)
+            new THREE.Vector3(0, 25, -55),
+            new THREE.Vector3(0, 70, 0),
+            new THREE.Vector3(60, 25, 0)
         ];
         const offset = offsets[state.cameraMode];
+        const target = offset.clone().applyMatrix4(state.vehicleGroup.matrixWorld);
+        camera.position.lerp(target, 0.08);
 
-        const cameraTarget = offset.clone().applyMatrix4(state.vehicleGroup.matrixWorld);
-        camera.position.lerp(cameraTarget, 0.08);
-
-        const lookTarget = new THREE.Vector3(0, 5, state.cameraMode === 1 ? 0 : 30);
-        lookTarget.applyMatrix4(state.vehicleGroup.matrixWorld);
-        camera.lookAt(lookTarget);
+        const look = new THREE.Vector3(0, 5, state.cameraMode === 1 ? 0 : 25);
+        look.applyMatrix4(state.vehicleGroup.matrixWorld);
+        camera.lookAt(look);
     }
 
     // === INPUT ===
     window.addEventListener('keydown', (e) => {
-        switch (e.key.toLowerCase()) {
-            case 'w': drive.keys.w = true; break;
-            case 'a': drive.keys.a = true; break;
-            case 's': drive.keys.s = true; break;
-            case 'd': drive.keys.d = true; break;
-            case ' ': drive.keys.space = true; e.preventDefault(); break;
-            case 'v': state.cameraMode = (state.cameraMode + 1) % 3; break;
-        }
+        const key = e.key.toLowerCase();
+        if (key === 'w') drive.keys.w = true;
+        else if (key === 'a') drive.keys.a = true;
+        else if (key === 's') drive.keys.s = true;
+        else if (key === 'd') drive.keys.d = true;
+        else if (key === ' ') { drive.keys.space = true; e.preventDefault(); }
+        else if (key === 'v') state.cameraMode = (state.cameraMode + 1) % 3;
     });
 
     window.addEventListener('keyup', (e) => {
-        switch (e.key.toLowerCase()) {
-            case 'w': drive.keys.w = false; break;
-            case 'a': drive.keys.a = false; break;
-            case 's': drive.keys.s = false; break;
-            case 'd': drive.keys.d = false; break;
-            case ' ': drive.keys.space = false; break;
-        }
+        const key = e.key.toLowerCase();
+        if (key === 'w') drive.keys.w = false;
+        else if (key === 'a') drive.keys.a = false;
+        else if (key === 's') drive.keys.s = false;
+        else if (key === 'd') drive.keys.d = false;
+        else if (key === ' ') drive.keys.space = false;
     });
 
     window.addEventListener('resize', () => {
@@ -901,17 +1146,16 @@
     });
 
     // === UI ===
-    function showToast(msg) {
+    function showToast(msg, type = 'success') {
         const toast = document.getElementById('toast');
         toast.textContent = msg;
-        toast.classList.add('visible');
+        toast.className = 'toast visible ' + type;
         setTimeout(() => toast.classList.remove('visible'), 2500);
     }
 
     document.getElementById('viewBtn').addEventListener('click', () => {
         state.cameraMode = (state.cameraMode + 1) % 3;
-        const modes = ['Follow', 'Top-Down', 'Side'];
-        showToast(`Camera: ${modes[state.cameraMode]}`);
+        showToast(['Follow', 'Top-Down', 'Side'][state.cameraMode], 'success');
     });
 
     document.getElementById('resetBtn').addEventListener('click', () => {
@@ -919,41 +1163,52 @@
         state.vehicleGroup.rotation.set(0, 0, 0);
         drive.speed = 0;
         drive.steering = 0;
-        showToast('Position Reset');
+        showToast('Position Reset', 'success');
     });
 
+    document.getElementById('clearAllFaults').addEventListener('click', clearAllFaults);
+
     // === ANIMATION ===
-    function animate(currentTime) {
+    function animate(time) {
         requestAnimationFrame(animate);
 
-        // Frame rate limiting for consistent performance
-        const elapsed = currentTime - lastFrameTime;
+        const elapsed = time - lastFrameTime;
         if (elapsed < FRAME_INTERVAL) return;
-        lastFrameTime = currentTime - (elapsed % FRAME_INTERVAL);
+        lastFrameTime = time - (elapsed % FRAME_INTERVAL);
 
         updateDrive();
         updateCamera();
 
-        // Infinite environment
-        const vehiclePos = state.vehicleGroup.position;
-        gridHelper.position.x = Math.floor(vehiclePos.x / 20) * 20;
-        gridHelper.position.z = Math.floor(vehiclePos.z / 20) * 20;
-        road.position.z = Math.floor(vehiclePos.z / 1000) * 1000;
+        // Infinite environment follow
+        const pos = state.vehicleGroup.position;
+        gridHelper.position.x = Math.floor(pos.x / 20) * 20;
+        gridHelper.position.z = Math.floor(pos.z / 20) * 20;
+        road.position.z = Math.floor(pos.z / 1000) * 1000;
         centerLine.position.z = road.position.z;
 
-        // Update shadow light
-        mainLight.position.x = vehiclePos.x + 50;
-        mainLight.position.z = vehiclePos.z + 50;
-        mainLight.target.position.copy(vehiclePos);
+        // Shadow follow
+        mainLight.position.x = pos.x + 50;
+        mainLight.position.z = pos.z + 50;
+        mainLight.target.position.copy(pos);
         mainLight.target.updateMatrixWorld();
 
-        // Animate connection particles
+        // Animate particles
         state.connections.forEach(conn => {
-            conn.particles.forEach(p => {
-                p.userData.t += 0.012;
-                if (p.userData.t > 1) p.userData.t = 0;
-                p.position.copy(p.userData.curve.getPoint(p.userData.t));
-            });
+            if (conn.status === 'normal') {
+                conn.particles.forEach(p => {
+                    p.userData.t += p.userData.speed;
+                    if (p.userData.t > 1) p.userData.t = 0;
+                    p.position.copy(p.userData.curve.getPoint(p.userData.t));
+                });
+            }
+        });
+
+        // Fault pulse animation
+        const pulseIntensity = 0.3 + Math.sin(time * 0.005) * 0.2;
+        state.devices.forEach(device => {
+            if (device.status === 'fault') {
+                device.material.emissiveIntensity = pulseIntensity;
+            }
         });
 
         renderer.render(scene, camera);
